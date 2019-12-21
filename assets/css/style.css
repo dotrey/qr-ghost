@@ -1,0 +1,63 @@
+@font-face {
+	font-family: "Open Sans Regular";
+    src: url('/assets/font/OpenSans-Regular.ttf'); /* see font/Apache License.txt */
+    font-display: swap;
+}
+
+@font-face {
+	font-family: "Roboto Mono Regular";
+    src: url('/assets/font/RobotoMono-Regular.ttf'); /* see font/Apache License.txt */
+    font-display: swap;
+}
+
+body, html {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+	font-family: "Open Sans Regular", Arial, sans-serif;
+	font-size: 4.5vw;
+	line-height: 1.4;
+    color: #000000;
+    background-color: #E0E0E0;
+}
+
+.grid {
+    position: absolute;
+    display: grid;
+    top: 0;
+    left: 0;
+    right: 0;
+    grid-template-columns: 5vw 90vw 5vw;
+    grid-template-rows: 5vw 90vw 5vw auto 5vw;
+    grid-template-areas: 
+        ". . ."
+        ". image ."
+        ". . ."
+        ". result ."
+        ". . .";
+}
+
+.image {
+    position: relative;
+    display: block;
+    justify-self: stretch;
+    align-self: stretch;
+    grid-area: image;
+    background-color: #000000;
+}
+
+.result {
+    position: relative;
+    display: block;
+    justify-self: stretch;
+    align-self: stretch;
+    grid-area: result;
+    background-color: #FFFFFF;
+    padding: 1em;
+    word-wrap: break-word;
+}

@@ -61,3 +61,42 @@ body {
     padding: 1em;
     word-wrap: break-word;
 }
+
+.video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #000000;
+}
+
+.video-container video {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.video-container .overlay {
+    position: absolute;
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-top: 5vw solid rgba(0,0,0,0.5);
+    border-left: 5vw solid rgba(0,0,0,0.5);
+    border-right: 5vw solid rgba(0,0,0,0.5);
+    border-bottom: calc(100vh - 95vw) solid rgba(0,0,0,0.7);
+}
+
+.video-container .info {
+    position: absolute;
+    color: #E0E0E0;
+    box-sizing: border-box;
+    top: 100vw;
+    left: 5vw;
+    right: 5vw;
+    text-align: center;
+}

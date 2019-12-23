@@ -9,9 +9,15 @@
     <title>qr ghost</title>
 </head>
 <body>
-    <main class="grid">
-
+    <main id="main-container" class="grid">
+        <canvas id="qr-image" class="image"></canvas>
+        <div id="qr-result" class="result"></div>
     </main>
+    <div id="video-container" class="video-container">
+        <video id="qr-video"></video>
+        <div class="overlay"></div>
+        <div class="info">Position the QR code in the area above.</div>
+    </div>
     <script type="module">
         import qrGhost from "./built/qrGhost.js";
         window.qrg = new qrGhost();

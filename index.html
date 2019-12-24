@@ -11,12 +11,16 @@
 <body>
     <main id="main-container" class="grid">
         <canvas id="qr-image" class="image"></canvas>
-        <div id="qr-result" class="result"></div>
+        <div id="scan-button" class="scan-button"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="result-wrapper">
+            <div id="qr-result" class="result"></div>
+        </div>
     </main>
     <div id="video-container" class="video-container">
         <video id="qr-video"></video>
         <div class="overlay"></div>
         <div class="info">Position the QR code in the area above.</div>
+        <div class="cancel">&#x2190; cancel</div>
     </div>
     <script type="module">
         import qrGhost from "./built/qrGhost.js";

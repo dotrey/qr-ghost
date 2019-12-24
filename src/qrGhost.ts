@@ -12,6 +12,7 @@ export default class qrGhost {
     private videoContainer : HTMLElement;
 
     private qr : qrWrapper;
+    private scanning : boolean = false;
 
     constructor() {
         this.container = document.getElementById("main-container");
@@ -20,13 +21,21 @@ export default class qrGhost {
         this.setupResult();
         this.setupVideo();
         this.qr = new qrWrapper(this.displayResult.bind(this));
+        this.hideVideo();
     }
 
     displayResult(result : string) {
+        if (!result) {
+            this.scan();
+            return;
+        }
         if (result.match(/^[a-z]*?:\/\//i)) {
             this.displayResultUrl(result);
         }else{
             this.displayResultGeneral(result);
+        }
+        if (this.scanning) {
+            this.stopScanning();
         }
     }
 
@@ -41,6 +50,14 @@ export default class qrGhost {
 
     private displayResultGeneral(result : string) {
         this.result.innerHTML = result;
+    }
+
+    hideVideo() {
+        if (this.video.srcObject) {
+            this.video.pause();
+            this.video.srcObject = null;
+        }
+        this.videoContainer.style.display = "none";
     }
 
     showVideo() {
@@ -70,6 +87,27 @@ export default class qrGhost {
             });
     }
 
+    private startScanning() {
+        let context = this.canvas.getContext("2d");
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.scanning = true;
+        this.scan();
+    }
+
+    private scan() {
+        this.log("scan...");
+        if (!this.scanning || this.video.paused || this.video.ended) {
+            this.log("... not scanning, video paused or ended");
+            return;
+        }
+        this.qr.decodeVideo(this.canvas, this.video);
+    }
+
+    private stopScanning() {
+        this.scanning = false;
+        this.hideVideo();
+    }
+
     private adjustVideoSize() {
         this.video.width = this.videoContainer.offsetWidth;
         let adjust = (time : number) => {
@@ -83,7 +121,7 @@ export default class qrGhost {
             }
 
             // request an animation frame so the video can be layouted after setting the width
-            if (this.video.offsetHeight < this.video.width) {
+            if (this.video.offsetHeight < this.videoContainer.offsetWidth) {
                 // make sure the video at least fills the cut-out area
                 this.video.width = Math.ceil((this.video.width / this.video.offsetHeight) * this.video.width);
                 this.log("new width " + this.video.width);
@@ -99,6 +137,20 @@ export default class qrGhost {
     }
 
     private setupResult() {
+        let btn = document.getElementById("scan-button");
+        btn.addEventListener("touchstart", (e : Event) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.showVideo();
+            this.log("touch scan");
+        });
+        btn.addEventListener("click", (e : Event) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.showVideo();
+            this.log("click scan");
+        });
+
         this.result = document.getElementById("qr-result") as HTMLDivElement;
     }
 
@@ -106,7 +158,24 @@ export default class qrGhost {
         this.video = document.getElementById("qr-video") as HTMLVideoElement;
         this.video.addEventListener("play", (e : Event) => {
             this.log("playing");
+            this.startScanning();
+        });
+        this.video.addEventListener("resize", (e : Event) => {
+            this.log("resize");
             this.adjustVideoSize();
+        });
+        let cancel = this.videoContainer.querySelector(".cancel");
+        cancel.addEventListener("touchstart", (e : Event) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.hideVideo();
+            this.log("touch cancel");
+        });
+        cancel.addEventListener("click", (e : Event) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.hideVideo();
+            this.log("click cancel");
         });
     }
 

@@ -16,6 +16,7 @@ body, html {
     height: 100%;
     padding: 0;
     margin: 0;
+    overflow: hidden;
 }
 
 body {
@@ -32,8 +33,9 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    grid-template-columns: 5vw 90vw 5vw;
-    grid-template-rows: 5vw 90vw 5vw auto 5vw;
+    bottom: 0;
+    grid-template-columns: 10vw 80vw 10vw;
+    grid-template-rows: 10vw 80vw 5vw auto 5vw;
     grid-template-areas: 
         ". . ."
         ". image ."
@@ -51,15 +53,76 @@ body {
     background-color: #000000;
 }
 
-.result {
+.result-wrapper {
     position: relative;
     display: block;
     justify-self: stretch;
     align-self: stretch;
     grid-area: result;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.result {
+    position: relative;
+    display: block;
     background-color: #FFFFFF;
     padding: 1em;
     word-wrap: break-word;
+}
+
+.scan-button {
+    position: relative;
+    display: block;
+    grid-area: image;
+    justify-self: end;
+    align-self: end;
+    box-sizing: border-box;
+    width: 3em;
+    height: 3em;
+    padding: 0.75em;
+    background-color: rgba(255,255,255,0.8);
+    line-height: 0;
+}
+
+.scan-button::before {
+    position: absolute;
+    display: block;
+    content: "";
+    box-sizing: border-box;
+    top: 0.5em;
+    left: 0.5em;
+    width: 2em;
+    height: 2em;
+    border: 0.1em dashed #000000;
+}
+
+.scan-button>span {
+    position: relative;
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    background-color: transparent;
+}
+
+.scan-button>span:nth-child(1),
+.scan-button>span:nth-child(3),
+.scan-button>span:nth-child(7) {
+    background-color: #000000;
+}
+
+.scan-button>span:nth-child(1)::before,
+.scan-button>span:nth-child(3)::before,
+.scan-button>span:nth-child(7)::before {
+    position: absolute;
+    display: block;
+    content: "";
+    top: 0.05em;
+    left: 0.05em;
+    right: 0.05em;
+    bottom: 0.05em;
+    box-sizing: border-box;
+    border: 0.075em solid #FFFFFF;
 }
 
 .video-container {
@@ -85,10 +148,10 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    border-top: 5vw solid rgba(0,0,0,0.5);
-    border-left: 5vw solid rgba(0,0,0,0.5);
-    border-right: 5vw solid rgba(0,0,0,0.5);
-    border-bottom: calc(100vh - 95vw) solid rgba(0,0,0,0.7);
+    border-top: 10vw solid rgba(0,0,0,0.5);
+    border-left: 10vw solid rgba(0,0,0,0.5);
+    border-right: 10vw solid rgba(0,0,0,0.5);
+    border-bottom: calc(100vh - 90vw) solid rgba(0,0,0,0.7);
 }
 
 .video-container .info {
@@ -96,7 +159,19 @@ body {
     color: #E0E0E0;
     box-sizing: border-box;
     top: 100vw;
+    left: 0;
+    right: 0;
+    text-align: center;
+}
+
+.video-container .cancel {
+    position: absolute;
+    color: #E0E0E0;
+    box-sizing: border-box;
+    bottom: 5vw;
     left: 5vw;
     right: 5vw;
+    padding: 0.75em;
     text-align: center;
+    border: 2px solid #E0E0E0;
 }

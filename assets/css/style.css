@@ -27,6 +27,51 @@ body {
     background-color: #E0E0E0;
 }
 
+a, a:hover, a:visited, a:active {
+    color: #0012FF;
+}
+
+h1 {
+    display: block;
+    font-size: 2em;
+    margin-block-start: 0.67em;
+    margin-block-end: 0.67em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
+
+.hr {
+    display: block;
+    margin: 1em 0;
+    height: 1px;
+    background-color: #CCCCCC;
+}
+
+.show-info-button {
+    position: relative;
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: center;
+    align-self: center;
+    width: 2em;
+    height: 2em;
+    text-align: center;
+    line-height: 2em;
+}
+
+.show-info-button::before {
+    position: absolute;
+    display: block;
+    content: "i";
+    top: 0;
+    left: 0;
+    width: 2em;
+    height: 2em;
+    background-color: #FFFFFF;
+    border-radius: 50%;
+}
+
 .grid {
     position: absolute;
     display: grid;
@@ -174,4 +219,56 @@ body {
     padding: 0.75em;
     text-align: center;
     border: 2px solid #E0E0E0;
+}
+
+.info-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    color: #000000;
+    background-color: #FFFFFF;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1em;
+    text-align: center;
+}
+
+.info-container .hide-info-button {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 2.2em;
+    height: 2.2em;
+    text-align: center;
+    line-height: 2.2em;
+}
+
+.info-container .main {
+    position: relative;
+    display: grid;
+    width: 100%;
+    height: 100%;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+}
+
+.info-container .about {
+    position: relative;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+    align-self: center;
+}
+
+.info-container .credits {
+    position: relative;
+    text-align: left;
+}
+
+.info-container .credits .license {
+    margin: 2em 0;
+    font-size: 50%;
 }

@@ -4,6 +4,7 @@ export default class qrGhost {
     private canvas : HTMLCanvasElement;
     private result : HTMLDivElement;
     private container : HTMLElement;
+    private infoContainer : HTMLElement;
     private video : HTMLVideoElement;
     private videoConstraints : MediaStreamConstraints = {
         video : true,
@@ -16,12 +17,14 @@ export default class qrGhost {
 
     constructor() {
         this.container = document.getElementById("main-container");
+        this.infoContainer = document.getElementById("info-container");
         this.videoContainer = document.getElementById("video-container");
         this.setupCanvas();
         this.setupResult();
         this.setupVideo();
         this.qr = new qrWrapper(this.displayResult.bind(this));
         this.hideVideo();
+        this.setupInfo();
     }
 
     displayResult(result : string) {
@@ -136,17 +139,25 @@ export default class qrGhost {
         this.canvas.height = this.canvas.offsetHeight;
     }
 
+    private setupInfo() {
+        let show = document.getElementById("show-info-button");
+        this.addClickListener(show, (e : Event) => {
+            this.infoContainer.style.display = "block";
+        });
+        let hide = document.getElementById("hide-info-button");
+        this.addClickListener(hide, (e : Event) => {
+            this.infoContainer.style.display = "none";
+        });
+        this.infoContainer.style.display = "none";
+    }
+
     private setupResult() {
         let btn = document.getElementById("scan-button");
-        btn.addEventListener("touchstart", (e : Event) => {
-            e.preventDefault();
-            e.stopPropagation();
+        this.addClickListener(btn, (e : Event) => {
             this.showVideo();
             this.log("touch scan");
         });
-        btn.addEventListener("click", (e : Event) => {
-            e.preventDefault();
-            e.stopPropagation();
+        this.addClickListener(btn, (e : Event) => {
             this.showVideo();
             this.log("click scan");
         });
@@ -165,17 +176,26 @@ export default class qrGhost {
             this.adjustVideoSize();
         });
         let cancel = this.videoContainer.querySelector(".cancel");
-        cancel.addEventListener("touchstart", (e : Event) => {
-            e.preventDefault();
-            e.stopPropagation();
+        this.addClickListener(cancel, (e : Event) => {
             this.hideVideo();
             this.log("touch cancel");
         });
-        cancel.addEventListener("click", (e : Event) => {
-            e.preventDefault();
-            e.stopPropagation();
+        this.addClickListener(cancel, (e : Event) => {
             this.hideVideo();
             this.log("click cancel");
+        });
+    }
+ 
+    private addClickListener(element : Element, handler : (e:Event) => void) {
+        element.addEventListener("touchstart", (e : Event) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handler(e);
+        });
+        element.addEventListener("click", (e : Event) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handler(e);
         });
     }
 

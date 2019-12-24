@@ -1,12 +1,12 @@
 @font-face {
 	font-family: "Open Sans Regular";
-    src: url('/assets/font/OpenSans-Regular.ttf'); /* see font/Apache License.txt */
+    src: url('../font/OpenSans-Regular.ttf'); /* see font/Apache License.txt */
     font-display: swap;
 }
 
 @font-face {
 	font-family: "Roboto Mono Regular";
-    src: url('/assets/font/RobotoMono-Regular.ttf'); /* see font/Apache License.txt */
+    src: url('../font/RobotoMono-Regular.ttf'); /* see font/Apache License.txt */
     font-display: swap;
 }
 

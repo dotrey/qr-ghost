@@ -4,7 +4,7 @@ export default class qrWrapper {
 
     constructor(resultHandler : (result : string) => void) {
         this.resultHandler = resultHandler;
-        this.worker = new Worker("/lib/qrWorker/qrWorker.js");
+        this.worker = new Worker("./lib/qrWorker/qrWorker.js");
 
         this.worker.onmessage = (e) => {
             const type = e.data.type;

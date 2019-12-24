@@ -4,10 +4,13 @@ export default class qrGhost {
     private canvas : HTMLCanvasElement;
     private result : HTMLDivElement;
     private container : HTMLElement;
+    private errorContainer : HTMLElement;
     private infoContainer : HTMLElement;
     private video : HTMLVideoElement;
     private videoConstraints : MediaStreamConstraints = {
-        video : true,
+        video : {
+            facingMode : "environment"
+        },
         audio : false
     }
     private videoContainer : HTMLElement;
@@ -19,6 +22,7 @@ export default class qrGhost {
         this.container = document.getElementById("main-container");
         this.infoContainer = document.getElementById("info-container");
         this.videoContainer = document.getElementById("video-container");
+        this.errorContainer = document.getElementById("error");
         this.setupCanvas();
         this.setupResult();
         this.setupVideo();
@@ -64,6 +68,8 @@ export default class qrGhost {
     }
 
     showVideo() {
+        // clear error
+        this.error();
         if (!navigator.mediaDevices) {
             this.log("no media device support");
             return;
@@ -77,16 +83,18 @@ export default class qrGhost {
                     this.log("video stream ended");
                 }
                 this.video.srcObject = stream;
-                this.video.play();
             })
             .catch((error) => {
-                if (error.name === "ConstraintNotSatisfiedError") {
-                    this.log("No video stream available for specified constraints.", this.videoConstraints);
-                }else if (error.name === "PermissionDeniedError") {
-                    this.log("User permission was denied.")
+                if (error.name === "ConstraintNotSatisfiedError" ||
+                    error.name === "OverconstrainedError") {
+                    this.error("No video stream available for specified constraints.", this.videoConstraints);
+                }else if (error.name === "PermissionDeniedError" || 
+                    error.name === "NotAllowedError") {
+                    this.error("Permission to access camera is required.")
                 }else{
-                    this.log("Error while accessing video stream.", error);
+                    this.error("Error while accessing video stream.", error);
                 }
+                this.hideVideo();
             });
     }
 
@@ -95,10 +103,10 @@ export default class qrGhost {
         context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.scanning = true;
         this.scan();
+        this.log("start scan...");
     }
 
     private scan() {
-        this.log("scan...");
         if (!this.scanning || this.video.paused || this.video.ended) {
             this.log("... not scanning, video paused or ended");
             return;
@@ -109,6 +117,7 @@ export default class qrGhost {
     private stopScanning() {
         this.scanning = false;
         this.hideVideo();
+        this.log("stopped scan");
     }
 
     private adjustVideoSize() {
@@ -175,6 +184,10 @@ export default class qrGhost {
             this.log("resize");
             this.adjustVideoSize();
         });
+        this.video.addEventListener("loadedmetadata", (e : Event) => {
+            this.video.play();
+        });
+
         let cancel = this.videoContainer.querySelector(".cancel");
         this.addClickListener(cancel, (e : Event) => {
             this.hideVideo();
@@ -190,13 +203,23 @@ export default class qrGhost {
         element.addEventListener("touchstart", (e : Event) => {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
             handler(e);
         });
         element.addEventListener("click", (e : Event) => {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
             handler(e);
         });
+    }
+
+    private error(msg? : string, o? : any) {
+        this.errorContainer.innerHTML = msg || "";
+        if (!msg) {
+            return;
+        }
+        this.log(msg, o);
     }
 
     private log(msg : string, o? : any) {

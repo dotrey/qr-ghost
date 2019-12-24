@@ -98,6 +98,22 @@ h1 {
     background-color: #000000;
 }
 
+.error {
+    position: relative;
+    display: "block";
+    justify-self: center;
+    align-self: center;
+    grid-area: image;
+    background-color: #000000;
+    padding: 0.5em;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.error:empty {
+    display: none;
+}
+
 .result-wrapper {
     position: relative;
     display: block;

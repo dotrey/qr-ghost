@@ -354,6 +354,12 @@ h1 {
     align-self: center;
 }
 
+.info-container .about>img {
+    position: relative;
+    margin: 0 auto;
+    width: 10em;
+}
+
 .info-container .supported {
     position: relative;
     text-align: left;

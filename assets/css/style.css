@@ -63,7 +63,7 @@ h1 {
 .show-info-button::before {
     position: absolute;
     display: block;
-    content: "i";
+    content: "?";
     top: 0;
     left: 0;
     width: 2em;
@@ -132,6 +132,10 @@ h1 {
     word-wrap: break-word;
 }
 
+.result.copied {
+    background-color: rgb(120, 255, 67);
+}
+
 .scan-button {
     position: relative;
     display: block;
@@ -186,6 +190,48 @@ h1 {
     border: 0.075em solid #FFFFFF;
 }
 
+.clipboard {
+    position: relative;
+    display: block;
+    height: 1.75em;
+    width: 1.5em;
+    box-sizing: border-box;
+    border: 0.1em solid #000000;
+    background-color: #E0E0E0;
+    border-radius: 0.25em;
+    grid-row: 4;
+    grid-column: 3;
+    justify-self: center;
+    align-self: start;
+    margin-top: 0.25em;
+}
+
+.clipboard::after {
+    position: absolute;
+    top: -0.2em;
+    left: calc(50% - 0.4em);
+    display: block;
+    box-sizing: border-box;
+    content: "";
+    border: 0.1em solid #000000;
+    background-color: #E0E0E0;
+    width: 0.8em;
+    height: 0.4em;
+    border-radius: 0.1em;
+}
+
+.clipboard::before {
+    position: absolute;
+    top: 0.1em;
+    left: calc(50% - 0.5em);
+    display: block;
+    box-sizing: border-box;
+    content: "";
+    background-color: #FFFFFF;
+    width: 1em;
+    height: 1.25em;
+}
+
 .video-container {
     position: absolute;
     top: 0;
@@ -204,37 +250,66 @@ h1 {
 
 .video-container .overlay {
     position: absolute;
-    box-sizing: border-box;
+    display: grid;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    border-top: 10vw solid rgba(0,0,0,0.5);
-    border-left: 10vw solid rgba(0,0,0,0.5);
-    border-right: 10vw solid rgba(0,0,0,0.5);
-    border-bottom: calc(100vh - 90vw) solid rgba(0,0,0,0.7);
+    grid-template-columns: 10vw 80vw 10vw;
+    grid-template-rows: 10vw 80vw 5vw auto 5vw;
+    grid-template-areas: 
+        "top top top"
+        "left image right"
+        ". . ."
+        ". content ."
+        ". . .";
+}
+
+.video-container .overlay .top,
+.video-container .overlay .left,
+.video-container .overlay .right,
+.video-container .overlay .bottom {
+    position: relative;
+    display: block;
+    background-color: rgba(0,0,0,0.75);
+    justify-self: stretch;
+    align-self: stretch;
+    grid-area: top;
+}
+
+.video-container .overlay .left {
+    grid-area: left;
+}
+
+.video-container .overlay .right {
+    grid-area: right;
+}
+
+.video-container .overlay .bottom {
+    grid-column: 1/3;
+    grid-row: 3/5;
 }
 
 .video-container .info {
-    position: absolute;
+    position: relative;
     color: #E0E0E0;
     box-sizing: border-box;
-    top: 100vw;
-    left: 0;
-    right: 0;
     text-align: center;
+    justify-self: center;
+    align-self: start;
+    grid-area: content;
 }
 
 .video-container .cancel {
-    position: absolute;
+    position: relative;
     color: #E0E0E0;
     box-sizing: border-box;
-    bottom: 5vw;
-    left: 5vw;
-    right: 5vw;
     padding: 0.75em;
     text-align: center;
     border: 2px solid #E0E0E0;
+    justify-self: stretch;
+    align-self: end;
+    grid-area: content;
 }
 
 .info-container {

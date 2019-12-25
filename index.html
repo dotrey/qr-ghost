@@ -12,16 +12,22 @@
         <canvas id="qr-image" class="image"></canvas>
         <div id="scan-button" class="scan-button"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <div id="error" class="error"></div>
-        <div id="show-info-button" class="show-info-button">i</div>
+        <div id="show-info-button" class="show-info-button"></div>
         <div class="result-wrapper">
             <div id="qr-result" class="result"></div>
         </div>
+        <div id="copy-button" class="clipboard"></div>
     </main>
     <div id="video-container" class="video-container">
         <video id="qr-video"></video>
-        <div class="overlay"></div>
-        <div class="info">Position the QR code in the area above.</div>
-        <div class="cancel">&#x2190; cancel</div>
+        <div class="overlay">
+            <div class="top"></div>
+            <div class="left"></div>
+            <div class="right"></div>
+            <div class="bottom"></div>
+            <div class="info">Position the QR code in the area above.</div>
+            <div class="cancel">&#x2190; cancel</div>
+        </div>
     </div>
     <div id="info-container" class="info-container">
         <div class="main">

@@ -3,12 +3,14 @@ A simple and lightweight QR code scanner.
 
 ## open ideas
 - Add exhaustive scan mode (slower)
-- Display info when in landscape mode that portrait is required
 - Add support for WiFi QR codes
 - Add support for back-button (especially mobile devices)
 - New project: Wrap as Android app
 
 ## dev log
+**2019-12-27** v0.3
+- Display info when in landscape mode that portrait is required
+
 **2019-12-25** v0.3
 - Improved video overlay
 - Added button to copy QR content

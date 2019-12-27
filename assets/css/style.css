@@ -390,3 +390,95 @@ h1 {
     margin: 2em 0;
     font-size: 50%;
 }
+
+.landscape {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    display: none;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "center";
+    background-color: #E0E0E0;
+}
+
+.landscape .info {
+    position: relative;
+    align-self: center;
+    justify-self: center;
+    grid-area: center;
+    text-align: center;
+    line-height: 3em;
+}
+
+.landscape .info .rotate {
+    position: relative;
+    display: inline-block;
+    margin: 0 0.5em;
+    width: 2em;
+    height: 2em;
+    vertical-align: middle;
+}
+
+.landscape .info .rotate::before {
+    position: absolute;
+    display: block;
+    content: "";
+    top: 0.9em;
+    left: 0;
+    width: 1.6em;
+    height: 0.9em;
+    border: 0.1em dashed #999999;
+    border-radius: 0.2em;
+}
+
+.landscape .info .rotate::after {
+    position: absolute;
+    display: block;
+    content: "";
+    top: 0;
+    left: 0.9em;
+    width: 0.9em;
+    height: 1.6em;
+    border: 0.1em solid #000000;
+    border-radius: 0.2em;
+}
+
+.landscape .info .resize {
+    position: relative;
+    display: inline-block;
+    margin: 0 0.5em;
+    width: 2.5em;
+    height: 2em;
+    vertical-align: middle;
+}
+
+.landscape .info .resize::before {
+    position: absolute;
+    display: block;
+    content: "";
+    top: 0.1em;
+    left: 0;
+    width: 2.3em;
+    height: 1.6em;
+    border: 0.1em dashed #999999;
+}
+
+.landscape .info .resize::after {
+    position: absolute;
+    display: block;
+    content: "";
+    top: 0.1em;
+    right: 0;
+    width: 0.9em;
+    height: 1.6em;
+    border: 0.1em solid #000000;
+}
+
+@media screen and (min-aspect-ratio: 1/1) {
+    .landscape {
+        display: grid;
+    }
+}

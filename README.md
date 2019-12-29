@@ -8,6 +8,9 @@ A simple and lightweight QR code scanner.
 - New project: Wrap as Android app
 
 ## dev log
+**2019-12-29** v0.3
+- Added `?debug` parameter to show console output
+
 **2019-12-27** v0.3
 - Display info when in landscape mode that portrait is required
 

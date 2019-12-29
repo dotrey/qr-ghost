@@ -116,6 +116,9 @@ export default class qrGhost {
         navigator.mediaDevices.getUserMedia(this.videoConstraints)
             .then((stream : MediaStream) => {
                 this.log("video stream found (" + stream.id + ")");
+                for (let track of stream.getVideoTracks()) {
+                    this.log("- " + track.label + " : " + track.id);
+                }
                 stream.onremovetrack = (ev : MediaStreamTrackEvent) => {
                     this.log("video stream ended");
                 }

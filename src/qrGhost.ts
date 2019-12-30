@@ -1,4 +1,5 @@
 import qrWrapper from "./qrWrapper.js";
+import BackStack from "./BackStack.js";
 
 export default class qrGhost {
     private canvas : HTMLCanvasElement;
@@ -18,10 +19,14 @@ export default class qrGhost {
     private qr : qrWrapper;
     private scanning : boolean = false;
 
+    private backStack : BackStack;
+
     private debug : boolean = true;
     private extendedDebugging : HTMLTextAreaElement = null;
 
     constructor() {
+        this.backStack = new BackStack();
+
         this.container = document.getElementById("main-container");
         this.infoContainer = document.getElementById("info-container");
         this.videoContainer = document.getElementById("video-container");
@@ -113,6 +118,7 @@ export default class qrGhost {
         }
 
         this.videoContainer.style.display = "block";
+        this.backStack.push("video");
         navigator.mediaDevices.getUserMedia(this.videoConstraints)
             .then((stream : MediaStream) => {
                 this.log("video stream found (" + stream.id + ")");
@@ -134,7 +140,8 @@ export default class qrGhost {
                 }else{
                     this.error("Error while accessing video stream.", error);
                 }
-                this.hideVideo();
+                // this.hideVideo();
+                this.backStack.pop();
             });
     }
 
@@ -190,12 +197,16 @@ export default class qrGhost {
 
     private setupInfo() {
         let show = document.getElementById("show-info-button");
+        this.backStack.addPopHandler("info", () => {            
+            this.infoContainer.style.display = "none";
+        });
         this.addClickListener(show, (e : Event) => {
             this.infoContainer.style.display = "block";
+            this.backStack.push("info");
         });
         let hide = document.getElementById("hide-info-button");
         this.addClickListener(hide, (e : Event) => {
-            this.infoContainer.style.display = "none";
+            this.backStack.pop();
         });
         // hide the info overlay after a short moment
         // so the name and logo quickly flashes
@@ -241,88 +252,84 @@ export default class qrGhost {
 
         let cancel = this.videoContainer.querySelector(".cancel");
         this.addClickListener(cancel, (e : Event) => {
-            this.hideVideo();
+            this.backStack.pop();
             this.log("touch cancel");
         });
         this.addClickListener(cancel, (e : Event) => {
-            this.hideVideo();
+            this.backStack.pop();
             this.log("click cancel");
         });
         this.detectVideoDevices();
+
+        this.backStack.addPopHandler("video", this.hideVideo.bind(this));
     }
 
     private detectVideoDevices() {
         let constraints = navigator.mediaDevices.getSupportedConstraints();
         this.log("supported media constraints", constraints);
-        this.log("devices:")
-        let videoDevices : MediaDeviceInfo[] = [];
+        this.log("devices:");
         navigator.mediaDevices.enumerateDevices().then((devices : MediaDeviceInfo[]) => {
-            for (let device of devices) {
+            // On devices with multiple cameras, the chrome browser provides
+            // the first backwards facing camera in the list - which might 
+            // not always be the default camera, but could e.g. be a zoom
+            // camera (which is barely usable).
+            // To counter this, we check how many backward facing cameras the
+            // browser lists. Those cameras are usually numbered, but not
+            // always provided in the numbered order
+            // -> we fetch the backward facing camera with the lowest number
+
+            // check the label and only keep those cameras facing back
+            // Note: some browsers (e.g. Firefox) do not provide a label
+            let videoDevices : MediaDeviceInfo[] = devices.filter((device : MediaDeviceInfo) => {
                 this.log("- " + device.kind + " : " + device.label + " | id: " + device.deviceId);
-                if (device.kind === "videoinput") {
-                    videoDevices.push(device);
+                return device.kind === "videoinput" &&
+                     (device.label || "").indexOf("back") > -1;
+            });
+
+            // if there is more than 1 backwards facing camera, get the one
+            // with the lowest number
+            if (videoDevices.length > 1) {
+                this.log("multiple backward facing cameras detected");
+                let firstDevice : MediaDeviceInfo = null;
+                let lowest : number = -1;
+                let index : number = -1;
+                for (let device of videoDevices) {
+                    // remove any chars not a-z, 0-9 or space
+                    let label = device.label.toLowerCase().replace(/[^a-z0-9 ]/, "");
+                    let splitted = label.split(" ");
+                    if (index < 0) {
+                        // on the first device, detect the index of the first pure number
+                        for (let i = 0, ic = splitted.length; i < ic; i++) {
+                            // convert to number and back to string, if equal the
+                            // original string was a pure number
+                            if ((Number(splitted[i]) + "") === splitted[i]) {
+                                index = i;
+                                break;
+                            }
+                        }
+                    }
+                    let value : number = Number(splitted[index]);
+                    if (!isNaN(value) && 
+                        (value < lowest || lowest < 0)) {
+                        // currently lowest value
+                        lowest = value;
+                        firstDevice = device;
+                    }
+                }
+                if (firstDevice) {
+                    this.log("-> first device is ", firstDevice);
+                    // update the video constraints to prefer the device
+                    // with the id of the first device
+                    this.videoConstraints.video = Object.assign(this.videoConstraints.video, { id : { ideal : firstDevice.deviceId }});
+                    this.log("-> updated constraints", this.videoConstraints);
+                }else{
+                    this.log("-> unable to determine first device!");
                 }
             }
         })
         .catch((e) => {
             this.log("error while enumerating devices", e)
         });
-
-        // On devices with multiple cameras, the chrome browser provides
-        // the first backwards facing camera in the list - which might 
-        // not always be the default camera, but could e.g. be a zoom
-        // camera (which is barely usable).
-        // To counter this, we check how many backward facing cameras the
-        // browser lists. Those cameras are usually numbered, but not
-        // always provided in the numbered order
-        // -> we fetch the backward facing camera with the lowest number
-
-        // check the label and only keep those cameras facing back
-        // Note: some browsers (e.g. Firefox) do not provide a label
-        videoDevices = videoDevices.filter((value : MediaDeviceInfo) => {
-            return (value.label || "").indexOf("back") > -1;
-        });
-
-        // if there is more than 1 backwards facing camera, get the one
-        // with the lowest number
-        if (videoDevices.length > 1) {
-            this.log("multiple backward facing cameras detected");
-            let firstDevice : MediaDeviceInfo = null;
-            let lowest : number = -1;
-            let index : number = -1;
-            for (let device of videoDevices) {
-                // remove any chars not a-z, 0-9 or space
-                let label = device.label.toLowerCase().replace(/[^a-z0-9 ]/, "");
-                let splitted = label.split(" ");
-                if (index < 0) {
-                    // on the first device, detect the index of the first pure number
-                    for (let i = 0, ic = splitted.length; i < ic; i++) {
-                        // convert to number and back to string, if equal the
-                        // original string was a pure number
-                        if ((Number(splitted[i]) + "") === splitted[i]) {
-                            index = i;
-                            break;
-                        }
-                    }
-                }
-                let value : number = Number(splitted[index]);
-                if (!isNaN(value) && 
-                    (value < lowest || lowest < 0)) {
-                    // currently lowest value
-                    lowest = value;
-                    firstDevice = device;
-                }
-            }
-            if (firstDevice) {
-                this.log("-> first device is ", firstDevice);
-                // update the video constraints to prefer the device
-                // with the id of the first device
-                this.videoConstraints.video = Object.assign(this.videoConstraints.video, { id : { ideal : firstDevice.deviceId }});
-                this.log("-> updated constraints", this.videoConstraints);
-            }else{
-                this.log("-> unable to determine first device!");
-            }
-        }
     }
 
     private setupDebug() {

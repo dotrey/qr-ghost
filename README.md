@@ -8,6 +8,9 @@ A simple and lightweight QR code scanner.
 - New project: Wrap as Android app
 
 ## dev log
+**2019-12-30** v.04
+- Added mechanism to automatically select default camera on devices with multiple cameras
+
 **2019-12-29** v0.3
 - Added `?debug` parameter to show console output
 

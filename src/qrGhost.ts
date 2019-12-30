@@ -255,14 +255,74 @@ export default class qrGhost {
         let constraints = navigator.mediaDevices.getSupportedConstraints();
         this.log("supported media constraints", constraints);
         this.log("devices:")
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
+        let videoDevices : MediaDeviceInfo[] = [];
+        navigator.mediaDevices.enumerateDevices().then((devices : MediaDeviceInfo[]) => {
             for (let device of devices) {
                 this.log("- " + device.kind + " : " + device.label + " | id: " + device.deviceId);
+                if (device.kind === "videoinput") {
+                    videoDevices.push(device);
+                }
             }
         })
-.catch(function(err) {
-  console.log(err.name + ": " + err.message);
-});
+        .catch((e) => {
+            this.log("error while enumerating devices", e)
+        });
+
+        // On devices with multiple cameras, the chrome browser provides
+        // the first backwards facing camera in the list - which might 
+        // not always be the default camera, but could e.g. be a zoom
+        // camera (which is barely usable).
+        // To counter this, we check how many backward facing cameras the
+        // browser lists. Those cameras are usually numbered, but not
+        // always provided in the numbered order
+        // -> we fetch the backward facing camera with the lowest number
+
+        // check the label and only keep those cameras facing back
+        // Note: some browsers (e.g. Firefox) do not provide a label
+        videoDevices = videoDevices.filter((value : MediaDeviceInfo) => {
+            return (value.label || "").indexOf("back") > -1;
+        });
+
+        // if there is more than 1 backwards facing camera, get the one
+        // with the lowest number
+        if (videoDevices.length > 1) {
+            this.log("multiple backward facing cameras detected");
+            let firstDevice : MediaDeviceInfo = null;
+            let lowest : number = -1;
+            let index : number = -1;
+            for (let device of videoDevices) {
+                // remove any chars not a-z, 0-9 or space
+                let label = device.label.toLowerCase().replace(/[^a-z0-9 ]/, "");
+                let splitted = label.split(" ");
+                if (index < 0) {
+                    // on the first device, detect the index of the first pure number
+                    for (let i = 0, ic = splitted.length; i < ic; i++) {
+                        // convert to number and back to string, if equal the
+                        // original string was a pure number
+                        if ((Number(splitted[i]) + "") === splitted[i]) {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+                let value : number = Number(splitted[index]);
+                if (!isNaN(value) && 
+                    (value < lowest || lowest < 0)) {
+                    // currently lowest value
+                    lowest = value;
+                    firstDevice = device;
+                }
+            }
+            if (firstDevice) {
+                this.log("-> first device is ", firstDevice);
+                // update the video constraints to prefer the device
+                // with the id of the first device
+                this.videoConstraints.video = Object.assign(this.videoConstraints.video, { id : { ideal : firstDevice.deviceId }});
+                this.log("-> updated constraints", this.videoConstraints);
+            }else{
+                this.log("-> unable to determine first device!");
+            }
+        }
     }
 
     private setupDebug() {
@@ -307,11 +367,13 @@ export default class qrGhost {
         }
         if (this.extendedDebugging) {
             this.extendedDebugging.value += "\n" + msg;
-            if (o) {
+            if (typeof o === "object") {
                 this.extendedDebugging.value += "\nOBJECT: " + o;
                 for (let prop of Object.getOwnPropertyNames(o)) {
                     this.extendedDebugging.value += "\n " + prop + " : " + o[prop];
                 }
+            }else if (o) {
+                this.extendedDebugging.value += "\nVALUE: " + o;
             }
             this.extendedDebugging.scrollTop = this.extendedDebugging.scrollHeight;
         }

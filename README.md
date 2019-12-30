@@ -4,6 +4,7 @@ A simple and lightweight QR code scanner.
 ## open ideas
 - Add exhaustive scan mode (slower)
 - Add support for WiFi QR codes
+- Add buttons to manually select camera (automatic detection requires permission, which might cause unwanted permission requests in browsers like Opera)
 - New project: Wrap as Android app
 
 ## dev log

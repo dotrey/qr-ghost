@@ -356,16 +356,16 @@ export default class qrGhost {
                         this.log("-> first device is ", firstDevice);
                         // update the video constraints to prefer the device
                         // with the id of the first device
-                        // this.videoConstraints = {
-                        //     audio : false,
-                        //     video : {
-                        //         deviceId : {
-                        //             ideal : firstDevice.deviceId
-                        //         },
-                        //         facingMode : "environment"
-                        //     }
-                        // }
-                        // this.log("-> updated constraints", this.videoConstraints);
+                        this.videoConstraints = {
+                            audio : false,
+                            video : {
+                                deviceId : {
+                                    ideal : firstDevice.deviceId
+                                },
+                                facingMode : "environment"
+                            }
+                        }
+                        this.log("-> updated constraints", this.videoConstraints);
                     }else{
                         this.log("-> unable to determine first device!");
                     }

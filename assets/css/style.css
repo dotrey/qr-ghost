@@ -200,6 +200,43 @@ h1 {
     border: 0.075em solid #FFFFFF;
 }
 
+.camera-icon {
+    position: relative;
+    box-sizing: border-box;
+    width: 1.5em;
+    height: 1em;
+    margin: 0.35em 0 0.25em 0;
+    background-color: #000000;
+    border-radius: 0.2em;
+}
+
+.camera-icon::before {
+    position: absolute;
+    display: block;
+    content: "";
+    box-sizing: border-box;
+    background-color: #000000;
+    width: 0.75em;
+    height: 0.5em;
+    border-radius: 0.25em;
+    top: -0.2em;
+    left: 0.375em;
+}
+
+.camera-icon::after {
+    position: absolute;
+    display: block;
+    content: "";
+    box-sizing: border-box;
+    background-color: transparent;
+    width: 0.75em;
+    height: 0.75em;
+    border-radius: 50%;
+    border: 0.1em solid #FFFFFF;
+    top: 0.1em;
+    left: 0.375em;
+}
+
 .clipboard {
     position: relative;
     display: block;

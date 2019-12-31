@@ -344,7 +344,57 @@ h1 {
     text-align: center;
     justify-self: center;
     align-self: start;
-    grid-area: content;
+    grid-row: 4;
+    grid-column: 1/4;
+}
+
+.video-container .exhaustive {
+    position: relative;
+    display: block;
+    color: #E0E0E0;
+    box-sizing: border-box;
+    margin: 0.5em 0;
+}
+
+.video-container .exhaustive input[type=checkbox] {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+    top: -1em;
+    left: -1em;
+    width: 0.5em;
+    height: 0.5em;
+}
+
+.video-container .exhaustive input[type=checkbox] + span {
+    position: relative;
+    padding-left: 2em;
+}
+
+.video-container .exhaustive input[type=checkbox] + span::before {
+    position: absolute;
+    display: block;
+    content: "";
+    width: 1.4em;
+    height: 1.4em;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    background-color: transparent;
+    border: 0.1em solid #E0E0E0;
+    border-radius: 0.1em;
+}
+
+.video-container .exhaustive input[type=checkbox]:checked + span::after {
+    position: absolute;
+    display: block;
+    content: "";
+    width: 0.8em;
+    height: 0.8em;
+    top: 0.3em;
+    left: 0.3em;
+    box-sizing: border-box;
+    background-color: #E0E0E0;
 }
 
 .video-container .cancel {

@@ -73,4 +73,18 @@ export default class qrWrapper {
     imageData(context : CanvasRenderingContext2D) {
         return context.getImageData(0, 0, context.canvas.width, context.canvas.height);
     }
+
+    scanMode(exhaustive : boolean = false) {
+        if (exhaustive) {
+            this.worker.postMessage({
+                type : "scan-mode",
+                data : "exhaustive"
+            });
+        }else{
+            this.worker.postMessage({
+                type : "scan-mode",
+                data : "normal"
+            });
+        }
+    }
 }

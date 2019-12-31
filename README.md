@@ -2,14 +2,14 @@
 A simple and lightweight QR code scanner.
 
 ## open ideas
-- Add exhaustive scan mode (slower)
 - Add support for WiFi QR codes
 - Add buttons to manually select camera on multi-cam devices (automatic detection requires permission, which might either cause unwanted permission requests in browsers like Opera or automatic detection works only on second attempt after permission was granted)
   - Add notification to Chrome browser on multi-cam devices
 - New project: Wrap as Android app
 
 ## dev log
-**2019-12-31** v0.5
+**2019-12-31** v0.6
+- Added exhaustive scan mode (slower) for improved QR code detection
 - Fixed auto-select on multi-cam devices
 - Changed icon for scan button to camera icon for better recognition of the functionality
 

@@ -260,6 +260,13 @@ export default class qrGhost {
             this.backStack.pop();
             this.log("click cancel");
         });
+
+        let exhaust = document.getElementById("exhaustive-scan-button") as HTMLInputElement;
+        exhaust.addEventListener("change", () => {
+            this.log("setting scan mode: " + (exhaust.checked ? "exhaustive" : "normal"));
+            this.qr.scanMode(exhaust.checked);
+        });
+
         this.detectVideoDevices();
 
         this.backStack.addPopHandler("video", this.hideVideo.bind(this));

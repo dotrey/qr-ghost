@@ -29,6 +29,7 @@ body {
 
 a, a:hover, a:visited, a:active {
     color: #0012FF;
+    word-break: break-word;
 }
 
 h1 {

@@ -70,7 +70,7 @@ export default class qrGhost {
         this.result.innerHTML = result;
     }
 
-    private copyResult() {
+    private copyResult(retry : boolean = false) {
         let result = this.result.innerText;
         let copySuccess = () => {
             this.result.classList.add("copied");
@@ -78,7 +78,7 @@ export default class qrGhost {
                 this.result.classList.remove("copied");
             }, 500);
         }
-        if (!navigator.clipboard) {
+        if (!navigator.clipboard || retry) {
             let ta = document.createElement("textarea");
             ta.setAttribute("style", "position: fixed;");
             ta.value = result;
@@ -93,10 +93,11 @@ export default class qrGhost {
             }
             document.body.removeChild(ta)
         } else {
-            navigator.clipboard.writeText(result).then(function() {
+            navigator.clipboard.writeText(result).then(() => {
                 copySuccess();
-            }, function(err) {
-                this.log("copy to clipboard failed")
+            }, (err) => {
+                this.log("copy to clipboard failed, retry");
+                this.copyResult(true);
             })
         }
     }

@@ -302,5 +302,10 @@ limitations under the License.
         import qrGhost from "./built/qrGhost.js";
         window.qrg = new qrGhost();
     </script>
+    <script>
+        if (!("noModule" in HTMLScriptElement.prototype)) {
+            alert("Your browser is too old, please update.");
+        }
+    </script>
 </body>
 </html>

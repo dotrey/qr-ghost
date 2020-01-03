@@ -11,8 +11,6 @@ export default class BackStack {
     private onpop(event : PopStateEvent) {
         if (typeof this.events[event.state] === "function") {
             this.events[event.state]();
-
-            console.log(history.state);
             event.preventDefault();
             window.history.replaceState(undefined, "");
         }

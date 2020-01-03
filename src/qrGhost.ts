@@ -107,6 +107,7 @@ export default class qrGhost {
             this.video.pause();
             this.video.srcObject = null;
         }
+        this.video.pause();
         this.videoContainer.style.display = "none";
     }
 
@@ -119,6 +120,7 @@ export default class qrGhost {
         }
 
         this.videoContainer.style.display = "block";
+        // this.video.style.visibility = "hidden";
         this.backStack.push("video");
         navigator.mediaDevices.getUserMedia(this.videoConstraints)
             .then((stream : MediaStream) => {
@@ -130,7 +132,7 @@ export default class qrGhost {
                     this.log("video stream ended");
                 }
                 this.video.srcObject = stream;
-                this.video.play();
+                this.assertVideoPlaying()
             })
             .catch((error) => {
                 if (error.name === "ConstraintNotSatisfiedError" ||
@@ -145,6 +147,22 @@ export default class qrGhost {
                 // this.hideVideo();
                 this.backStack.pop();
             });
+    }
+
+    private assertVideoPlaying() {
+        // if video has a src, is visible and not playing -> trigger play
+        if (this.video.srcObject && 
+            this.videoContainer.style.display === "block" &&
+            (this.video.paused || this.video.ended)) {
+         
+            try {
+                this.log("asserting video playback...");
+                this.video.play();
+            }catch(ex) {
+                this.log("exception while starting playback", ex);
+            }
+            window.setTimeout(this.assertVideoPlaying.bind(this), 250);
+        }
     }
 
     private startScanning() {
@@ -242,6 +260,7 @@ export default class qrGhost {
         this.video = document.getElementById("qr-video") as HTMLVideoElement;
         this.video.addEventListener("play", (e : Event) => {
             this.log("playing");
+            // this.video.style.visibility = "visible";
             this.startScanning();
         });
         this.video.addEventListener("resize", (e : Event) => {
@@ -249,7 +268,7 @@ export default class qrGhost {
             this.adjustVideoSize();
         });
         this.video.addEventListener("loadedmetadata", (e : Event) => {
-            this.video.play();
+            this.assertVideoPlaying();
         });
 
         let cancel = this.videoContainer.querySelector(".cancel");
@@ -267,6 +286,12 @@ export default class qrGhost {
             this.log("setting scan mode: " + (exhaust.checked ? "exhaustive" : "normal"));
             this.qr.scanMode(exhaust.checked);
         });
+
+        if (navigator.mediaDevices) {
+            navigator.mediaDevices.addEventListener("devicechange", (ev : Event) => {
+                this.log("media devices have changed!");
+            });
+        }
 
         this.detectVideoDevices();
 

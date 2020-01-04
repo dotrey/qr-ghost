@@ -1,5 +1,6 @@
 import qrWrapper from "./qrWrapper.js";
 import BackStack from "./BackStack.js";
+import VideoHelper from "./VideoHelper.js";
 
 export default class qrGhost {
     private canvas : HTMLCanvasElement;
@@ -7,14 +8,10 @@ export default class qrGhost {
     private container : HTMLElement;
     private errorContainer : HTMLElement;
     private infoContainer : HTMLElement;
+    
     private video : HTMLVideoElement;
-    private videoConstraints : MediaStreamConstraints = {
-        video : {
-            facingMode : "environment"
-        },
-        audio : false
-    }
     private videoContainer : HTMLElement;
+    private videoHelper : VideoHelper;
 
     private qr : qrWrapper;
     private scanning : boolean = false;
@@ -40,6 +37,8 @@ export default class qrGhost {
         this.setupInfo();
         this.log("initialized");
     }
+
+    //////////////////////////////////////////
 
     displayResult(result : string) {
         if (!result) {
@@ -102,12 +101,10 @@ export default class qrGhost {
         }
     }
 
+    //////////////////////////////////////////
+
     hideVideo() {
-        if (this.video.srcObject) {
-            this.video.pause();
-            this.video.srcObject = null;
-        }
-        this.video.pause();
+        this.videoHelper.pause();
         this.videoContainer.style.display = "none";
     }
 
@@ -120,49 +117,27 @@ export default class qrGhost {
         }
 
         this.videoContainer.style.display = "block";
-        // this.video.style.visibility = "hidden";
+        this.video.style.visibility = "hidden";
         this.backStack.push("video");
-        navigator.mediaDevices.getUserMedia(this.videoConstraints)
-            .then((stream : MediaStream) => {
-                this.log("video stream found (" + stream.id + ")");
-                for (let track of stream.getVideoTracks()) {
-                    this.log("- " + track.label + " : " + track.id);
-                }
-                stream.onremovetrack = (ev : MediaStreamTrackEvent) => {
-                    this.log("video stream ended");
-                }
-                this.video.srcObject = stream;
-                this.assertVideoPlaying()
+
+        this.videoHelper.play()
+            .then((value : DOMException) => {
+                // video is playing
+                this.video.style.visibility = "visible";
             })
-            .catch((error) => {
-                if (error.name === "ConstraintNotSatisfiedError" ||
+            .catch((error : DOMException) => {
+                // failed to start video playback
+                    if (error.name === "ConstraintNotSatisfiedError" ||
                     error.name === "OverconstrainedError") {
-                    this.error("No video stream available for specified constraints.", this.videoConstraints);
+                    this.error("No video stream available for specified constraints.");
                 }else if (error.name === "PermissionDeniedError" || 
                     error.name === "NotAllowedError") {
                     this.error("Permission to access camera is required.")
                 }else{
                     this.error("Error while accessing video stream.", error);
                 }
-                // this.hideVideo();
                 this.backStack.pop();
-            });
-    }
-
-    private assertVideoPlaying() {
-        // if video has a src, is visible and not playing -> trigger play
-        if (this.video.srcObject && 
-            this.videoContainer.style.display === "block" &&
-            (this.video.paused || this.video.ended)) {
-         
-            try {
-                this.log("asserting video playback...");
-                this.video.play();
-            }catch(ex) {
-                this.log("exception while starting playback", ex);
-            }
-            window.setTimeout(this.assertVideoPlaying.bind(this), 250);
-        }
+            })
     }
 
     private startScanning() {
@@ -208,6 +183,8 @@ export default class qrGhost {
         };
         window.requestAnimationFrame(adjust);
     }
+
+    //////////////////////////////////////////
 
     private setupCanvas() {
         this.canvas = document.getElementById("qr-image") as HTMLCanvasElement;
@@ -260,15 +237,11 @@ export default class qrGhost {
         this.video = document.getElementById("qr-video") as HTMLVideoElement;
         this.video.addEventListener("play", (e : Event) => {
             this.log("playing");
-            // this.video.style.visibility = "visible";
             this.startScanning();
         });
         this.video.addEventListener("resize", (e : Event) => {
             this.log("resize");
             this.adjustVideoSize();
-        });
-        this.video.addEventListener("loadedmetadata", (e : Event) => {
-            this.assertVideoPlaying();
         });
 
         let cancel = this.videoContainer.querySelector(".cancel");
@@ -287,132 +260,12 @@ export default class qrGhost {
             this.qr.scanMode(exhaust.checked);
         });
 
-        if (navigator.mediaDevices) {
-            navigator.mediaDevices.addEventListener("devicechange", (ev : Event) => {
-                this.log("media devices have changed!");
-            });
+        this.videoHelper = new VideoHelper(this.video, this.log.bind(this));
+        if (!this.videoHelper.detectVideoDevices()) {
+            this.error("no video devices detected");
         }
 
-        this.detectVideoDevices();
-
-        this.backStack.addPopHandler("video", this.hideVideo.bind(this));
-    }
-
-    private requestVideoDevices() {
-        // if we have not yet requested the video device permission,
-        // the enumeration of the devices holds no label-values
-        // -> we need these labels to determine the camera on multi-cam devices
-        // => request device permission on start up
-        this.error();
-        if (!navigator.mediaDevices) {
-            this.error("no media device support");
-            return;
-        }
-
-        this.log("requesting initial device permission")
-        navigator.mediaDevices.getUserMedia(this.videoConstraints)
-            .then((stream : MediaStream) => {
-                this.log("camera permission granted");
-                this.detectVideoDevices(true);
-            })
-            .catch((error) => {
-                if (error.name === "ConstraintNotSatisfiedError" ||
-                    error.name === "OverconstrainedError") {
-                    this.error("No video stream available for specified constraints.", this.videoConstraints);
-                }else if (error.name === "PermissionDeniedError" || 
-                    error.name === "NotAllowedError") {
-                    this.error("Permission to access camera is required.")
-                }else{
-                    this.error("Error while accessing video stream.", error);
-                }
-            });
-    }
-
-    private detectVideoDevices(isRetry : boolean = false) {
-        let constraints = navigator.mediaDevices.getSupportedConstraints();
-        this.log("supported media constraints", constraints);
-        this.log("devices:");
-        navigator.mediaDevices.enumerateDevices().then((devices : MediaDeviceInfo[]) => {
-            // On devices with multiple cameras, the chrome browser provides
-            // the first backwards facing camera in the list - which might 
-            // not always be the default camera, but could e.g. be a zoom
-            // camera (which is barely usable).
-            // To counter this, we check how many backward facing cameras the
-            // browser lists. Those cameras are usually numbered, but not
-            // always provided in the numbered order
-            // -> we fetch the backward facing camera with the lowest number
-
-            // check the label and only keep those cameras facing back
-            // Note: some browsers (e.g. Firefox) do not provide a label
-            let videoDevices : MediaDeviceInfo[] = devices.filter((device : MediaDeviceInfo) => {
-                this.log("- " + device.kind + " : " + device.label + " | id: " + device.deviceId);
-                return device.kind === "videoinput";
-            });
-
-            if (videoDevices.length > 0) {
-                this.log("at least 1 camera found");
-                videoDevices = videoDevices.filter((device : MediaDeviceInfo) => {
-                    return (device.label || "").indexOf("back") > -1;
-                });
-
-                if (videoDevices.length > 1) {
-                    // if there is more than 1 backwards facing camera, get the one
-                    // with the lowest number
-                    this.log("multiple backward facing cameras detected");
-                    let firstDevice : MediaDeviceInfo = null;
-                    let lowest : number = -1;
-                    let index : number = -1;
-                    for (let device of videoDevices) {
-                        // remove any chars not a-z, 0-9 or space
-                        let label = device.label.toLowerCase().replace(/[^a-z0-9 ]/, "");
-                        let splitted = label.split(" ");
-                        if (index < 0) {
-                            // on the first device, detect the index of the first pure number
-                            for (let i = 0, ic = splitted.length; i < ic; i++) {
-                                // convert to number and back to string, if equal the
-                                // original string was a pure number
-                                if ((Number(splitted[i]) + "") === splitted[i]) {
-                                    index = i;
-                                    break;
-                                }
-                            }
-                        }
-                        let value : number = Number(splitted[index]);
-                        if (!isNaN(value) && 
-                            (value < lowest || lowest < 0)) {
-                            // currently lowest value
-                            lowest = value;
-                            firstDevice = device;
-                        }
-                    }
-                    if (firstDevice) {
-                        this.log("-> first device is ", firstDevice);
-                        // update the video constraints to prefer the device
-                        // with the id of the first device
-                        this.videoConstraints = {
-                            audio : false,
-                            video : {
-                                deviceId : {
-                                    ideal : firstDevice.deviceId
-                                },
-                                facingMode : "environment"
-                            }
-                        }
-                        this.log("-> updated constraints", this.videoConstraints);
-                    }else{
-                        this.log("-> unable to determine first device!");
-                    }
-                }                
-            }else if (!videoDevices.length) {
-                // if there are no video devices, this either means:
-                // - we have no permission to access the devices yet, thus all labels were empty
-                // - we are insinde e.g. Firefox Klar, which prevents all cam access
-                this.error("no video devices detected")
-            }
-        })
-        .catch((e) => {
-            this.log("error while enumerating devices", e)
-        });
+        this.backStack.addPopHandler("video", this.stopScanning.bind(this));
     }
 
     private setupDebug() {
@@ -422,6 +275,8 @@ export default class qrGhost {
             document.body.appendChild(this.extendedDebugging);
         }
     }
+
+    //////////////////////////////////////////
  
     private addClickListener(element : Element, handler : (e:Event) => void) {
         element.addEventListener("touchstart", (e : Event) => {

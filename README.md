@@ -3,6 +3,7 @@ A simple and lightweight QR code scanner.
 
 ## open ideas
 - Add support for WiFi QR codes
+- Fix layout for tablets where less height is available
 - Add buttons to manually select camera on multi-cam devices (automatic detection requires permission, which might either cause unwanted permission requests in browsers like Opera or automatic detection works only on second attempt after permission was granted)
   - Add notification to Chrome browser on multi-cam devices
 - Wrap as Android app -> see github.com/dotrey/qr-ghost-android

@@ -17,6 +17,7 @@ body, html {
     padding: 0;
     margin: 0;
     overflow: hidden;
+    user-select: none;
 }
 
 body {
@@ -141,6 +142,7 @@ h1 {
     background-color: #FFFFFF;
     padding: 1em;
     word-wrap: break-word;
+    user-select: text;
 }
 
 .result.copied {

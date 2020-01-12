@@ -357,6 +357,7 @@ export default class qrGhost {
         if (location.search === "?debug" || debug) {
             this.extendedDebugging = document.createElement("textarea");
             this.extendedDebugging.classList.add("debug-area");
+            this.extendedDebugging.readOnly = true;
             document.body.appendChild(this.extendedDebugging);
         }
     }

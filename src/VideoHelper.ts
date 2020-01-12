@@ -90,18 +90,13 @@ export default class VideoHelper {
                 navigator.mediaDevices.getUserMedia(this.videoConstraints)
                 .then((stream : MediaStream) => {
                     this.log("video stream found (" + stream.id + ")");
-                    let trackLabel : string = "";
+                    let trackDeviceId : string = "";
                     for (let track of stream.getVideoTracks()) {
                         this.log("- " + track.label + " : " + track.id);
                         
-                        // unfortunately, the only thing we can match from the stream
-                        // against our cameras are the track's label and the camera's
-                        // label
-                        // -> this might be wrong, but only causes the UI to display
-                        // the wrong camera as active
-                        trackLabel = track.label;
+                        trackDeviceId = track.getSettings().deviceId;
                     }
-                    this.enumerateBackCameras(trackLabel);
+                    this.enumerateBackCameras(trackDeviceId);
                     stream.onremovetrack = (ev : MediaStreamTrackEvent) => {
                         this.log("video stream ended");
                     }
@@ -263,21 +258,12 @@ export default class VideoHelper {
         return true;
     }
 
-    private enumerateBackCameras(trackLabel : string) {
+    private enumerateBackCameras(trackDeviceId : string) {
         this.log("enumerating backward cameras");
         let done = (cameraDevices : MediaDeviceInfo[]) => {
             this.log(".. done enumerating backwards cameras", cameraDevices);
             if (typeof this.onDeviceRetrieved === "function") {
-                // get the id of the active device
-                let activeDeviceId : string = "";
-                for(let device of cameraDevices) {
-                    if (device.label === trackLabel) {
-                        activeDeviceId = device.deviceId;
-                        break
-                    }
-                }
-
-                this.onDeviceRetrieved(cameraDevices, activeDeviceId);
+                this.onDeviceRetrieved(cameraDevices, trackDeviceId);
             }
         }
         navigator.mediaDevices.enumerateDevices().then((devices : MediaDeviceInfo[]) => {    
@@ -287,12 +273,17 @@ export default class VideoHelper {
             let videoDevices : MediaDeviceInfo[] = devices.filter((device : MediaDeviceInfo) => {
                 return device.kind === "videoinput";
             });
+            this.log(".. total cameras: " + videoDevices.length);
 
             if (videoDevices.length > 0) {
                 // filter for back facing cameras only
+                let devicesWithLabel = 0;
                 videoDevices = videoDevices.filter((device : MediaDeviceInfo) => {
+                    this.log(".. > " + device.label + " (" + device.deviceId + ")");
+                    devicesWithLabel += !!device.label ? 1 : 0;
                     return (device.label || "").indexOf("back") > -1;
                 });
+                this.log(".. total backward cameras: " + videoDevices.length);
 
                 if (videoDevices.length) {
                     // if there are cameras, sort them by their internal order
@@ -320,6 +311,14 @@ export default class VideoHelper {
                     }
                     // remove empty values
                     cameraDevices = ordered.filter((d) => { return !!d});
+                }else if (devicesWithLabel === 0){                    
+                    // the devices have no labels, we can't tell wether they are
+                    // front or back facing
+                    // -> list all cameras so the user can still switch if required
+                    this.log(".. devices have no labels!", devices);
+                    // cameraDevices = devices.filter((device : MediaDeviceInfo) => {
+                    //     return device.kind === "videoinput";
+                    // });
                 }
             }
             done(cameraDevices);

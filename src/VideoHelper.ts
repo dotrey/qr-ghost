@@ -264,7 +264,9 @@ export default class VideoHelper {
     }
 
     private enumerateBackCameras(trackLabel : string) {
+        this.log("enumerating backward cameras");
         let done = (cameraDevices : MediaDeviceInfo[]) => {
+            this.log(".. done enumerating backwards cameras", cameraDevices);
             if (typeof this.onDeviceRetrieved === "function") {
                 // get the id of the active device
                 let activeDeviceId : string = "";

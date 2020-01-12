@@ -239,6 +239,17 @@ export default class qrGhost {
                 this.infoContainer.style.display = "none";
             }, 500);
         });
+
+        // add debug trigger to logo
+        let img = this.infoContainer.querySelector(".about img");
+        this.addClickListener(img, (e : Event) => {
+            let val = (img.getAttribute("data-debug") || "");
+            if (val.length === 9) {
+                // 10th click, show debug
+                this.setupDebug(true);
+            }
+            img.setAttribute("data-debug", val + ".");
+        });
     }
 
     private setupResult() {
@@ -342,8 +353,8 @@ export default class qrGhost {
         }
     }
 
-    private setupDebug() {
-        if (location.search === "?debug") {
+    private setupDebug(debug : boolean = false) {
+        if (location.search === "?debug" || debug) {
             this.extendedDebugging = document.createElement("textarea");
             this.extendedDebugging.classList.add("debug-area");
             document.body.appendChild(this.extendedDebugging);

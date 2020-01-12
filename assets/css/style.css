@@ -54,10 +54,16 @@ h1 {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 25%;
+    width: 50%;
+    height: 25vw;
     opacity: 0.8;
     z-index: 10;
+    resize: none;
+}
+
+.debug-area:focus {
+    width: 100%;
+    height: 80%;
 }
 
 .show-info-button {

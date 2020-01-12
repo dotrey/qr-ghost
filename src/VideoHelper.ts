@@ -14,6 +14,11 @@ export default class VideoHelper {
         audio : false
     }
 
+    // callback that will be triggered when a camera is accessed the first time,
+    // providing a list of backward facing camera devices and the id of the active
+    // camera device (device id, not index of the array)
+    onDeviceRetrieved : (devices : MediaDeviceInfo[], activeDeviceId : string) => void = null;
+
     constructor(public video : HTMLVideoElement, 
                 public log : (msg : string, o? : any ) => void) {
 
@@ -79,12 +84,24 @@ export default class VideoHelper {
                 // no stream or no active video track
                 // -> request a new one
                 this.log("requesting new video stream");
+                let assignStream = (stream : MediaStream) => {
+                    
+                };
                 navigator.mediaDevices.getUserMedia(this.videoConstraints)
                 .then((stream : MediaStream) => {
                     this.log("video stream found (" + stream.id + ")");
+                    let trackLabel : string = "";
                     for (let track of stream.getVideoTracks()) {
                         this.log("- " + track.label + " : " + track.id);
+                        
+                        // unfortunately, the only thing we can match from the stream
+                        // against our cameras are the track's label and the camera's
+                        // label
+                        // -> this might be wrong, but only causes the UI to display
+                        // the wrong camera as active
+                        trackLabel = track.label;
                     }
+                    this.enumerateBackCameras(trackLabel);
                     stream.onremovetrack = (ev : MediaStreamTrackEvent) => {
                         this.log("video stream ended");
                     }
@@ -122,6 +139,24 @@ export default class VideoHelper {
         this.video.pause();
     }
 
+    selectDevice(deviceId : string) : Promise<DOMException> {
+        // release current device before switching device
+        this.release();
+
+        // update constraints with new device id
+        this.videoConstraints = {
+            audio : false,
+            video : {
+                deviceId : {
+                    ideal : deviceId
+                },
+                facingMode : "environment"
+            }
+        }
+
+        return this.play();
+    }
+
     release() {
         this.log("releasing video stream")
         if (this.video.srcObject) {
@@ -154,7 +189,7 @@ export default class VideoHelper {
             // -> we fetch the backward facing camera with the lowest number
 
             // check the label and only keep those cameras facing back
-            // Note: some browsers (e.g. Firefox) do not provide a label
+            // Note: label is only available after camera permission was granted
             let videoDevices : MediaDeviceInfo[] = devices.filter((device : MediaDeviceInfo) => {
                 this.log("- " + device.kind + " : " + device.label + " | id: " + device.deviceId);
                 return device.kind === "videoinput";
@@ -228,4 +263,82 @@ export default class VideoHelper {
         return true;
     }
 
+    private enumerateBackCameras(trackLabel : string) {
+        let done = (cameraDevices : MediaDeviceInfo[]) => {
+            if (typeof this.onDeviceRetrieved === "function") {
+                // get the id of the active device
+                let activeDeviceId : string = "";
+                for(let device of cameraDevices) {
+                    if (device.label === trackLabel) {
+                        activeDeviceId = device.deviceId;
+                        break
+                    }
+                }
+
+                this.onDeviceRetrieved(cameraDevices, activeDeviceId);
+            }
+        }
+        navigator.mediaDevices.enumerateDevices().then((devices : MediaDeviceInfo[]) => {    
+            let cameraDevices : MediaDeviceInfo[] = [];        
+            // check the label and only keep those cameras facing back
+            // Note: label is only available after camera permission was granted
+            let videoDevices : MediaDeviceInfo[] = devices.filter((device : MediaDeviceInfo) => {
+                return device.kind === "videoinput";
+            });
+
+            if (videoDevices.length > 0) {
+                // filter for back facing cameras only
+                videoDevices = videoDevices.filter((device : MediaDeviceInfo) => {
+                    return (device.label || "").indexOf("back") > -1;
+                });
+
+                if (videoDevices.length) {
+                    // if there are cameras, sort them by their internal order
+                    let index : number = -1;
+                    let ordered : MediaDeviceInfo[] = [];
+                    for (let device of videoDevices) {
+                        // remove any chars not a-z, 0-9 or space
+                        let label = device.label.toLowerCase().replace(/[^a-z0-9 ]/, "");
+                        let splitted = label.split(" ");
+                        if (index < 0) {
+                            // on the first device, detect the index of the first pure number
+                            for (let i = 0, ic = splitted.length; i < ic; i++) {
+                                // convert to number and back to string, if equal the
+                                // original string was a pure number
+                                if ((Number(splitted[i]) + "") === splitted[i]) {
+                                    index = i;
+                                    break;
+                                }
+                            }
+                        }
+                        let value : number = Number(splitted[index]);
+                        if (!isNaN(value)) {
+                            ordered[value] = device;
+                        }
+                    }
+                    // remove empty values
+                    cameraDevices = ordered.filter((d) => { return !!d});
+                }
+            }
+            done(cameraDevices);
+        })
+        .catch((e) => {
+            this.log("error while enumerating devices", e);
+            done([]);
+        });
+    }
+
+    demoDevices() {
+        let cams : MediaDeviceInfo[] = [];
+        for (let i = 0; i < 5; i++) {
+            cams.push({
+                label : "camera " + i,
+                deviceId : "" + i,
+                groupId : "groupid",
+                kind : "videoinput",
+                toJSON : () => ""
+            });
+        }
+        this.onDeviceRetrieved(cams, "1");
+    }
 }

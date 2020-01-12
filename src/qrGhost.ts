@@ -13,6 +13,8 @@ export default class qrGhost {
     private videoContainer : HTMLElement;
     private videoHelper : VideoHelper;
 
+    private selectDeviceContainer : HTMLElement;
+
     private qr : qrWrapper;
     private scanning : boolean = false;
 
@@ -138,6 +140,31 @@ export default class qrGhost {
                 }
                 this.backStack.pop();
             })
+    }
+
+    selectDevice(deviceId : string) {
+        this.log("user select device: " + deviceId);
+        this.video.style.visibility = "hidden";
+
+        // selectDevice() works identical to play()
+        this.videoHelper.selectDevice(deviceId)
+        .then((value : DOMException) => {
+            // video is playing
+            this.video.style.visibility = "visible";
+        })
+        .catch((error : DOMException) => {
+            // failed to start video playback
+                if (error.name === "ConstraintNotSatisfiedError" ||
+                error.name === "OverconstrainedError") {
+                this.error("No video stream available for specified constraints.");
+            }else if (error.name === "PermissionDeniedError" || 
+                error.name === "NotAllowedError") {
+                this.error("Permission to access camera is required.")
+            }else{
+                this.error("Error while accessing video stream.", error);
+            }
+            this.backStack.pop();
+        })
     }
 
     private startScanning() {
@@ -266,6 +293,47 @@ export default class qrGhost {
         }
 
         this.backStack.addPopHandler("video", this.stopScanning.bind(this));
+
+        // video device selection
+        this.selectDeviceContainer = document.getElementById("select-device");
+        this.selectDeviceContainer.style.display = "none";
+        this.addClickListener(this.selectDeviceContainer, (e : Event) => {
+            this.backStack.pop();
+        });
+        let selectButton = document.getElementById("select-device-button");
+        selectButton.style.display = "none";
+        this.addClickListener(selectButton, (e : Event) => {
+            this.backStack.push("select-device");
+            this.selectDeviceContainer.style.display = "block";
+        })
+        this.backStack.addPopHandler("select-device", () => {
+            this.selectDeviceContainer.style.display = "none";
+        })
+        this.videoHelper.onDeviceRetrieved = (devices : MediaDeviceInfo[], activeDeviceId : string) => {
+            let selectButton = document.getElementById("select-device-button");
+            if (devices.length > 1) {
+                // if there is more than 1 device, allow the player to choose
+                this.selectDeviceContainer.innerHTML = "";
+
+                for(let device of devices) {
+                    let d = document.createElement("div");
+                    d.classList.add("device");
+                    if (device.deviceId === activeDeviceId) {
+                        d.classList.add("active");
+                    }
+                    d.innerHTML = device.label;
+                    this.addClickListener(d, (e : Event) => {
+                        this.backStack.pop();
+                        this.selectDevice(device.deviceId);
+                    });
+                    this.selectDeviceContainer.appendChild(d);
+                }
+
+                selectButton.style.display = "block";
+            }else{
+                selectButton.style.display = "none";
+            }
+        }
     }
 
     private setupDebug() {
@@ -328,5 +396,9 @@ export default class qrGhost {
 
     demoQrCode(file : string = "/assets/img/demo/qr-url.png") {
         this.qr.decodeImage(file, this.canvas);
+    }
+
+    demoDevices() {
+        this.videoHelper.demoDevices();
     }
 }

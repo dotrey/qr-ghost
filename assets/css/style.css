@@ -340,6 +340,108 @@ h1 {
     grid-row: 3/5;
 }
 
+.video-container .select-device-button {
+    position: relative;
+    display: block;
+    grid-area: image;
+    justify-self: end;
+    align-self: end;
+    box-sizing: border-box;
+    width: 5em;
+    height: 3em;
+    padding: 0.75em;
+    background-color: rgba(255,255,255,0.8);
+    line-height: 0;
+    text-align: right;
+}
+
+.video-container .select-device-button::before {
+    position: absolute;
+    top: 1.1em;
+    left: 0.75em;
+    content: "";
+    display: block;
+    width: 1.5em;
+    height: 0.25em;
+    box-sizing: border-box;
+    border: 0.15em solid #000000;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    transform: skewX(-45deg);
+}
+
+.video-container .select-device-button::after {
+    position: absolute;
+    bottom: 1em;
+    left: 0.5em;
+    content: "";
+    display: block;
+    width: 1.5em;
+    height: 0.25em;
+    box-sizing: border-box;
+    border: 0.15em solid #000000;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    transform: skewX(-45deg);
+}
+
+.video-container .select-device-button .camera-icon {
+    display: inline-block;
+}
+
+.video-container .device-list {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    box-sizing: border-box;
+    background-color: rgba(0,0,0,0.75);
+    padding: 10vw;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.video-container .device-list .device {
+    position: relative;
+    display: block;
+    padding: 0.75em 1.5em 0.75em 3.5em;
+    background-color: #FFFFFF;
+    line-height: 2em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin: 0.1em 0;
+}
+
+.video-container .device-list .device:first {
+    margin-top: 0;
+}
+
+.video-container .device-list .device::before {
+    position: absolute;
+    content: "";
+    top: 1em;
+    left: 1em;
+    width: 1.5em;
+    height: 1.5em;
+    box-sizing: border-box;
+    border: 0.1em solid #000000;
+    border-radius: 50%;
+}
+
+.video-container .device-list .device.active::after {
+    position: absolute;
+    content: "";
+    top: 1.25em;
+    left: 1.25em;
+    width: 1em;
+    height: 1em;
+    box-sizing: border-box;
+    background-color: #000000;
+    border-radius: 50%;
+}
+
 .video-container .info {
     position: relative;
     color: #E0E0E0;

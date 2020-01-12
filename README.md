@@ -9,6 +9,9 @@ A simple and lightweight QR code scanner.
 - Wrap as Android app -> see github.com/dotrey/qr-ghost-android
 
 ## dev log
+**2020-01-12** v0.8
+- Added manual camera selection if there is more than 1 backward facing camera
+
 **2020-01-04** v0.7
 - Reduced number of permission request by keeping video input stream
 - Automated release of video stream after loosing focus

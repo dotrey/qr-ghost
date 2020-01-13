@@ -7,6 +7,7 @@ export default class VideoHelper {
     private destroyAfterBlurTimeout : number = null;
     destroyAfterBlurDelay : number = 10;
 
+    private defaultFacingMode : string = "environment";
     videoConstraints : MediaStreamConstraints = {
         video : {
             facingMode : "environment"
@@ -84,9 +85,6 @@ export default class VideoHelper {
                 // no stream or no active video track
                 // -> request a new one
                 this.log("requesting new video stream");
-                let assignStream = (stream : MediaStream) => {
-                    
-                };
                 navigator.mediaDevices.getUserMedia(this.videoConstraints)
                 .then((stream : MediaStream) => {
                     this.log("video stream found (" + stream.id + ")");
@@ -139,13 +137,20 @@ export default class VideoHelper {
         this.release();
 
         // update constraints with new device id
-        this.videoConstraints = {
+        this.videoConstraints = this.defaultFacingMode ? {
             audio : false,
             video : {
                 deviceId : {
                     ideal : deviceId
                 },
-                facingMode : "environment"
+                facingMode : this.defaultFacingMode
+            }
+        } : {
+            audio : false,
+            video : {
+                deviceId : {
+                    ideal : deviceId
+                }
             }
         }
 
@@ -315,10 +320,13 @@ export default class VideoHelper {
                     // the devices have no labels, we can't tell wether they are
                     // front or back facing
                     // -> list all cameras so the user can still switch if required
-                    this.log(".. devices have no labels!", devices);
-                    // cameraDevices = devices.filter((device : MediaDeviceInfo) => {
-                    //     return device.kind === "videoinput";
-                    // });
+                    //    and remove the facing-mode constraint in case the front
+                    //    camera is selected
+                    cameraDevices = devices.filter((device : MediaDeviceInfo) => {
+                        return device.kind === "videoinput";
+                    });
+                    this.log(".. devices have no labels, remove facing-mode constraint");
+                    this.defaultFacingMode = null;
                 }
             }
             done(cameraDevices);

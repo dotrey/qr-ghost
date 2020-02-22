@@ -7,8 +7,23 @@
     "start_url" : "./index.html",
     "icons" : [
         {
-            "src" : "assets/img/qr-ghost.png",
+            "src" : "assets/img/icons/128-qr-ghost.png",
+            "sizes" : "128x128",
+            "type" : "image/png"
+        },
+        {
+            "src" : "assets/img/icons/192-qr-ghost.png",
+            "sizes" : "192x192",
+            "type" : "image/png"
+        },
+        {
+            "src" : "assets/img/icons/256-qr-ghost.png",
             "sizes" : "256x256",
+            "type" : "image/png"
+        },
+        {
+            "src" : "assets/img/icons/512-qr-ghost.png",
+            "sizes" : "512x512",
             "type" : "image/png"
         }
     ]

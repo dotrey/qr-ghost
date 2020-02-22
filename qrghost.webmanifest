@@ -17,7 +17,7 @@
             "type" : "image/png"
         },
         {
-            "src" : "assets/img/icons/256-qr-ghost.png",
+            "src" : "assets/img/qr-ghost.png",
             "sizes" : "256x256",
             "type" : "image/png"
         },

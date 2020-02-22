@@ -8,7 +8,7 @@ A simple and lightweight QR code scanner.
 
 ## dev log
 **2020-02-22** v0.9
-- Added features requires for PWA
+- Added features required for PWA
   - ServiceWorker for offline mode
   - .webmanifest for device installation
 

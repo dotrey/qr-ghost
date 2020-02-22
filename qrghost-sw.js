@@ -53,7 +53,7 @@ self.addEventListener("activate", function(e) {
     log("activate");
     e.waitUntil(caches.keys().then(function(keyList) {
         return Promise.all(keyList.map(function(key) {
-            if (key !== cacheName) {
+            if (key.indexOf("qr-ghost-cache") === 0 && key !== cacheName) {
                 log("clearing old cache " + key)
                 return caches.delete(key);
             }

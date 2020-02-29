@@ -129,7 +129,7 @@ export default class qrGhost {
             })
             .catch((error : DOMException) => {
                 // failed to start video playback
-                    if (error.name === "ConstraintNotSatisfiedError" ||
+                if (error.name === "ConstraintNotSatisfiedError" ||
                     error.name === "OverconstrainedError") {
                     this.error("No video stream available for specified constraints.");
                 }else if (error.name === "PermissionDeniedError" || 
@@ -154,7 +154,7 @@ export default class qrGhost {
         })
         .catch((error : DOMException) => {
             // failed to start video playback
-                if (error.name === "ConstraintNotSatisfiedError" ||
+            if (error.name === "ConstraintNotSatisfiedError" ||
                 error.name === "OverconstrainedError") {
                 this.error("No video stream available for specified constraints.");
             }else if (error.name === "PermissionDeniedError" || 

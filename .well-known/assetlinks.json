@@ -1,5 +1,12 @@
-[{
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target" : { "namespace": "android_app", "package_name": "de.gheist.android.qrghost",
-                 "sha256_cert_fingerprints": ["15:0D:CD:74:F9:7C:FE:AD:53:D9:71:F2:91:14:29:DF:6C:C4:1E:1C:38:9D:F4:60:37:B1:66:B7:14:90:B8:6A"] }
-}]
+[
+    {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target" : {
+            "namespace": "android_app", "package_name": "de.gheist.android.qrghost",
+            "sha256_cert_fingerprints": [
+                "15:0D:CD:74:F9:7C:FE:AD:53:D9:71:F2:91:14:29:DF:6C:C4:1E:1C:38:9D:F4:60:37:B1:66:B7:14:90:B8:6A",
+                "1B:B5:56:A6:42:2F:B6:2C:A7:4D:90:65:D8:DB:DE:39:02:05:BB:68:D6:B1:C8:01:91:0C:1F:22:4E:F5:BA:27"
+            ] 
+        }
+    }
+]

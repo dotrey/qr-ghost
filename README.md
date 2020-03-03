@@ -4,7 +4,7 @@ A simple and lightweight QR code scanner.
 ## open ideas
 - Add support for WiFi QR codes
 - Fix layout for tablets where less height is available
-- Wrap as Android app -> see github.com/dotrey/qr-ghost-android
+- Wrap as Android app -> see github.com/dotrey/qr-ghost-android-pwa
 
 ## dev log
 **2020-02-22** v0.9
